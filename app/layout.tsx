@@ -130,9 +130,9 @@ export default function RootLayout({
         logo: `${siteUrl}/images/logo.jpg`,
         image: `${siteUrl}/images/banner.jpg`,
         description:
-          "Amen Weight & Wellness provides personalized metabolic nutrition protocols, sustainable fat loss, and 1-on-1 personal coaching with Coach Amen via web and Telegram Mini App.",
-        priceRange: "$$",
-        telephone: "+1-800-555-AMEN",
+          "Amen Weight & Wellness provides personalized metabolic nutrition protocols, sustainable fat loss, and 1-on-1 personal coaching with Coach Amen via WhatsApp and Telegram Mini App.",
+        priceRange: "Contact for pricing",
+        telephone: "+251981120503",
         founder: {
           "@type": "Person",
           name: "Coach Amen",
@@ -143,17 +143,18 @@ export default function RootLayout({
         },
         address: {
           "@type": "PostalAddress",
-          addressLocality: "Los Angeles",
-          addressRegion: "CA",
-          addressCountry: "US",
+          addressLocality: "Addis Ababa",
+          addressRegion: "AA",
+          addressCountry: "ET",
         },
         geo: {
           "@type": "GeoCoordinates",
-          latitude: 34.0522,
-          longitude: -118.2437,
+          latitude: 9.032,
+          longitude: 38.746,
         },
         areaServed: [
           "Worldwide",
+          "Ethiopia",
           "United States",
           "United Kingdom",
           "Canada",
@@ -199,10 +200,10 @@ export default function RootLayout({
           },
           {
             "@type": "Question",
-            name: "How do I access Coach Amen on Telegram?",
+            name: "How do I reach Coach Amen on WhatsApp and Telegram?",
             acceptedAnswer: {
               "@type": "Answer",
-              text: "You can open our Telegram Mini App in one tap from your phone or desktop. Inside Telegram, you can review your daily meal schedule, log habits, and send photos of your meals directly to Coach Amen for real-time feedback.",
+              text: "You can message Coach Amen directly on WhatsApp or Telegram at +251 981 120 503, or launch our Telegram Mini App in one tap to review daily meal schedules, log habits, and receive personalized feedback.",
             },
           },
           {

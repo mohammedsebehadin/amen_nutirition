@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Sparkles,
@@ -14,32 +14,99 @@ import {
   Flame,
   Globe2,
   MessageCircle,
+  UserCheck,
+  Phone,
 } from "lucide-react";
 
 export default function AmenWellnessPage() {
   const [openFaq, setOpenFaq] = useState(0);
+  const [tgUser, setTgUser] = useState(null);
+  const [isTelegram, setIsTelegram] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.Telegram?.WebApp) {
+      const tg = window.Telegram.WebApp;
+      tg.ready();
+      try {
+        tg.expand();
+        tg.enableClosingConfirmation();
+      } catch {
+        // Ignore fallback on unsupported client versions
+      }
+
+      const user = tg.initDataUnsafe?.user;
+      if (user) {
+        queueMicrotask(() => {
+          setTgUser(user);
+          setIsTelegram(true);
+        });
+      } else if (tg.initData) {
+        queueMicrotask(() => {
+          setIsTelegram(true);
+        });
+      }
+    }
+  }, []);
+
+  const triggerHaptic = (style = "light") => {
+    if (typeof window !== "undefined" && window.Telegram?.WebApp?.HapticFeedback) {
+      try {
+        window.Telegram.WebApp.HapticFeedback.impactOccurred(style);
+      } catch {
+        // Safe fallback
+      }
+    }
+  };
 
   const toggleFaq = (index) => {
+    triggerHaptic("light");
     setOpenFaq(openFaq === index ? -1 : index);
   };
+
+  const WHATSAPP_NUMBER = "+251981120503";
+  const TELEGRAM_HANDLE = "+251981120503";
+  const DISPLAY_PHONE = "+251 981 120 503";
+  const WA_LINK = `https://wa.me/251981120503`;
+  const TG_LINK = `https://t.me/+251981120503`;
 
   return (
     <div className="relative min-h-screen w-full bg-[#fbfbfa] text-stone-900 selection:bg-emerald-600/20 selection:text-emerald-950">
       
       {/* ======================= TOP ANNOUNCEMENT BAR (BrandSurge Style) ======================= */}
-      <div className="border-b border-emerald-900/10 bg-[#14532d] px-4 py-2 text-center text-xs font-semibold text-emerald-100">
-        <div className="mx-auto flex max-w-6xl items-center justify-center gap-2">
-          <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
-          <span>Now live on Telegram Mini App — Personalized Nutrition &amp; 1-on-1 Coaching with Coach Amen.</span>
-          <a
-            href="https://t.me"
-            target="_blank"
-            rel="noreferrer"
-            className="hidden items-center gap-1 font-bold underline decoration-emerald-300 underline-offset-2 hover:text-white sm:inline-flex"
-          >
-            Launch Mini App
-            <ArrowUpRight size={13} />
-          </a>
+      <div className="border-b border-emerald-900/10 bg-[#14532d] px-4 py-2 text-xs font-semibold text-emerald-100">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+            {tgUser ? (
+              <span className="flex items-center gap-1.5 font-bold text-white">
+                <UserCheck size={14} className="text-emerald-300" />
+                Welcome, {tgUser.first_name}! Your personalized protocol is ready.
+              </span>
+            ) : (
+              <span>Personalized Nutrition &amp; 1-on-1 Health Coaching with Coach Amen</span>
+            )}
+          </div>
+          <div className="flex items-center gap-4 text-[11px] sm:text-xs">
+            <a
+              href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20would%20like%20to%20inquire%20about%20your%20nutrition%20coaching.`}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 font-bold text-emerald-200 hover:text-white transition"
+            >
+              <Phone size={13} className="text-emerald-300" />
+              <span>WhatsApp: {DISPLAY_PHONE}</span>
+            </a>
+            <span className="text-emerald-600 hidden sm:inline">|</span>
+            <a
+              href={TG_LINK}
+              target="_blank"
+              rel="noreferrer"
+              className="hidden sm:inline-flex items-center gap-1.5 font-bold text-emerald-200 hover:text-white transition"
+            >
+              <MessageCircle size={13} className="text-emerald-300" />
+              <span>Telegram: {DISPLAY_PHONE}</span>
+            </a>
+          </div>
         </div>
       </div>
 
@@ -74,20 +141,31 @@ export default function AmenWellnessPage() {
             <a href="#protocol" className="transition-colors hover:text-emerald-700">The Protocol</a>
             <a href="#meals" className="transition-colors hover:text-emerald-700">Nutrition &amp; Meals</a>
             <a href="#coach" className="transition-colors hover:text-emerald-700">Coach Amen</a>
-            <a href="#plans" className="transition-colors hover:text-emerald-700">Plans &amp; Pricing</a>
+            <a href="#plans" className="transition-colors hover:text-emerald-700">Protocols &amp; Programs</a>
             <a href="#faq" className="transition-colors hover:text-emerald-700">FAQ</a>
           </nav>
 
-          {/* Action Button */}
-          <div className="flex items-center gap-3">
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2">
             <a
-              href="https://t.me"
+              href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20would%20like%20to%20consult%20with%20you.`}
               target="_blank"
               rel="noreferrer"
+              onClick={() => triggerHaptic("medium")}
+              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-emerald-600 bg-emerald-50 px-3.5 py-1.5 text-xs font-bold text-emerald-900 transition hover:bg-emerald-100 active:scale-95 cursor-pointer"
+            >
+              <Phone size={12} className="text-emerald-700" />
+              <span>WhatsApp</span>
+            </a>
+            <a
+              href={TG_LINK}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() => triggerHaptic("medium")}
               className="inline-flex items-center gap-1.5 rounded-full bg-emerald-700 px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-emerald-800 active:scale-95 cursor-pointer"
             >
-              <span>Open in Telegram</span>
-              <ArrowUpRight size={14} />
+              <MessageCircle size={14} />
+              <span>Telegram</span>
             </a>
           </div>
         </div>
@@ -119,19 +197,24 @@ export default function AmenWellnessPage() {
 
                 <div className="flex flex-wrap items-center gap-3 pt-2">
                   <a
-                    href="#plans"
-                    className="inline-flex items-center justify-center rounded-full bg-white px-6 py-3.5 text-xs font-black uppercase tracking-wider text-emerald-950 shadow-lg shadow-black/10 transition hover:bg-emerald-50 active:scale-95 cursor-pointer"
-                  >
-                    Get Healthy Meals Plan
-                  </a>
-                  <a
-                    href="https://t.me"
+                    href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20would%20like%20to%20get%20a%20healthy%20meals%20protocol.`}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() => triggerHaptic("medium")}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-xs font-black uppercase tracking-wider text-emerald-950 shadow-lg shadow-black/10 transition hover:bg-emerald-50 active:scale-95 cursor-pointer"
+                  >
+                    <Phone size={14} className="text-emerald-700" />
+                    <span>WhatsApp: {DISPLAY_PHONE}</span>
+                  </a>
+                  <a
+                    href={TG_LINK}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => triggerHaptic("medium")}
                     className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-5 py-3.5 text-xs font-bold text-white backdrop-blur-md transition hover:bg-white/20 active:scale-95 cursor-pointer"
                   >
                     <MessageCircle size={15} />
-                    <span>Chat on Telegram</span>
+                    <span>Telegram Chat</span>
                   </a>
                 </div>
               </div>
@@ -194,14 +277,16 @@ export default function AmenWellnessPage() {
                   </div>
                 </div>
 
-                {/* Price / Plan Pills (like WellBites) */}
+                {/* Plan Tier Pills (Price Hidden — Direct Consultation) */}
                 <div className="mt-5 space-y-2">
                   <div className="flex items-center justify-between rounded-2xl bg-emerald-50/80 p-3.5 border border-emerald-200/80">
                     <div>
                       <span className="block text-xs font-extrabold text-emerald-950">Daily Wellness Box Protocol</span>
                       <span className="block text-[11px] text-emerald-700">Custom macro plan &amp; shopping list</span>
                     </div>
-                    <span className="text-base font-black text-emerald-900 font-mono">$12/wk</span>
+                    <span className="rounded-full bg-emerald-700/10 px-3 py-1 text-xs font-black text-emerald-800">
+                      Tailored Plan
+                    </span>
                   </div>
 
                   <div className="flex items-center justify-between rounded-2xl bg-stone-50 p-3.5 border border-stone-200">
@@ -209,7 +294,9 @@ export default function AmenWellnessPage() {
                       <span className="block text-xs font-extrabold text-stone-900">VIP Coached Nutrition &amp; Habits</span>
                       <span className="block text-[11px] text-stone-500">1-on-1 daily reviews with Coach Amen</span>
                     </div>
-                    <span className="text-base font-black text-stone-900 font-mono">$29/wk</span>
+                    <span className="rounded-full bg-stone-200 px-3 py-1 text-xs font-black text-stone-800">
+                      1-on-1 Coached
+                    </span>
                   </div>
                 </div>
 
@@ -237,7 +324,7 @@ export default function AmenWellnessPage() {
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
                 <HeartHandshake size={20} />
               </div>
-              <h3 className="text-sm font-extrabold text-stone-900">Direct Telegram Coach</h3>
+              <h3 className="text-sm font-extrabold text-stone-900">Direct WhatsApp &amp; Telegram</h3>
               <p className="mt-1 text-xs text-stone-500 leading-relaxed">
                 Daily meal photo reviews and 1-on-1 accountability directly with Coach Amen.
               </p>
@@ -304,7 +391,7 @@ export default function AmenWellnessPage() {
                 </p>
 
                 <p className="text-sm text-stone-600 leading-relaxed">
-                  Every client who works with me receives a protocol calibrated specifically for their body: balanced proteins, slow-burning glycogens, and anti-inflammatory whole meals. Plus, with our Telegram Mini App, you can send me your meals every day for instant accountability.
+                  Every client who works with me receives a protocol calibrated specifically for their body: balanced proteins, slow-burning glycogens, and anti-inflammatory whole meals. Plus, you can send me your meals every day on WhatsApp and Telegram for instant personal accountability.
                 </p>
 
                 <div className="grid grid-cols-3 gap-3 py-2 text-center text-xs">
@@ -322,15 +409,26 @@ export default function AmenWellnessPage() {
                   </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-2 flex flex-wrap gap-3">
                   <a
-                    href="https://t.me"
+                    href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20would%20like%20to%20learn%20more%20about%20your%20nutrition%20coaching.`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full bg-emerald-700 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-md transition hover:bg-emerald-800 active:scale-95 cursor-pointer"
+                    onClick={() => triggerHaptic("medium")}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#16a34a] px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-md transition hover:bg-[#15803d] active:scale-95 cursor-pointer"
                   >
-                    <span>Message Coach Amen on Telegram</span>
-                    <ArrowRight size={15} />
+                    <Phone size={14} />
+                    <span>WhatsApp: {DISPLAY_PHONE}</span>
+                  </a>
+                  <a
+                    href={TG_LINK}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => triggerHaptic("medium")}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#0284c7] px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-md transition hover:bg-[#0369a1] active:scale-95 cursor-pointer"
+                  >
+                    <MessageCircle size={15} />
+                    <span>Telegram Chat</span>
                   </a>
                 </div>
               </div>
@@ -394,17 +492,17 @@ export default function AmenWellnessPage() {
           </div>
         </section>
 
-        {/* ======================= PLANS & PRICING (BrandSurge Products Style) ======================= */}
+        {/* ======================= PROTOCOLS & PROGRAMS (PRICES HIDDEN) ======================= */}
         <section id="plans" className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
           <div className="text-center max-w-xl mx-auto mb-10">
             <span className="text-xs font-bold uppercase tracking-widest text-emerald-700">
-              Clear &amp; Transparent
+              Personalized Coaching
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-stone-900 mt-1 mb-2">
-              Choose Your Transformation Plan
+              Choose Your Transformation Protocol
             </h2>
             <p className="text-sm text-stone-600">
-              Select the coaching level that matches your commitment. All plans sync directly with Telegram.
+              Every body is unique. Contact Coach Amen on WhatsApp or Telegram to get a customized protocol quote.
             </p>
           </div>
 
@@ -415,9 +513,11 @@ export default function AmenWellnessPage() {
               <div>
                 <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Self-Paced</span>
                 <h3 className="text-xl font-black text-stone-900 mt-1">Metabolic Meal Plan</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-stone-900 font-mono">$12</span>
-                  <span className="text-xs font-semibold text-stone-500">/ week</span>
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-black text-emerald-900 uppercase tracking-wider">
+                    Custom Tailored
+                  </span>
+                  <span className="text-xs font-semibold text-stone-500">Inquire for Details</span>
                 </div>
                 <p className="mt-3 text-xs text-stone-600 leading-relaxed">
                   Full custom macro-balanced nutrition plan, recipes, and shopping lists tailored to your body weight.
@@ -434,19 +534,31 @@ export default function AmenWellnessPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check size={15} className="text-emerald-600 shrink-0" />
-                    <span>Telegram Mini App access</span>
+                    <span>Telegram &amp; WhatsApp delivery</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col sm:flex-row gap-2">
                 <a
-                  href="https://t.me"
+                  href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20am%20interested%20in%20the%20Metabolic%20Meal%20Plan.`}
                   target="_blank"
                   rel="noreferrer"
-                  className="block w-full rounded-full border border-stone-300 bg-white py-3 text-center text-xs font-bold text-stone-800 transition hover:bg-stone-50 active:scale-95 cursor-pointer"
+                  onClick={() => triggerHaptic("medium")}
+                  className="flex-1 rounded-full border border-emerald-600 bg-emerald-50/50 py-2.5 text-center text-xs font-bold text-emerald-900 transition hover:bg-emerald-100 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  Choose Plan
+                  <Phone size={12} className="text-emerald-700" />
+                  <span>WhatsApp</span>
+                </a>
+                <a
+                  href={TG_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => triggerHaptic("medium")}
+                  className="flex-1 rounded-full bg-emerald-700 py-2.5 text-center text-xs font-bold text-white transition hover:bg-emerald-800 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <MessageCircle size={13} />
+                  <span>Telegram</span>
                 </a>
               </div>
             </div>
@@ -460,9 +572,11 @@ export default function AmenWellnessPage() {
               <div>
                 <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Coached Protocol</span>
                 <h3 className="text-xl font-black text-stone-900 mt-1">1-on-1 Nutrition &amp; Habits</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-emerald-800 font-mono">$29</span>
-                  <span className="text-xs font-semibold text-stone-500">/ week</span>
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="rounded-full bg-emerald-100 border border-emerald-300 px-3 py-1 text-xs font-black text-emerald-950 uppercase tracking-wider">
+                    Direct Coaching
+                  </span>
+                  <span className="text-xs font-semibold text-emerald-800">Daily Accountability</span>
                 </div>
                 <p className="mt-3 text-xs text-stone-600 leading-relaxed">
                   Personal coaching with Coach Amen: daily meal photo review, habit accountability, and weekly adjustments.
@@ -483,19 +597,31 @@ export default function AmenWellnessPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check size={15} className="text-emerald-600 shrink-0" />
-                    <span>Direct Telegram priority messaging</span>
+                    <span>Direct WhatsApp &amp; Telegram access</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col sm:flex-row gap-2">
                 <a
-                  href="https://t.me"
+                  href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20would%20like%20to%20apply%20for%201-on-1%20Nutrition%20%26%20Habits%20coaching.`}
                   target="_blank"
                   rel="noreferrer"
-                  className="block w-full rounded-full bg-emerald-700 py-3 text-center text-xs font-black uppercase tracking-wider text-white shadow-md shadow-emerald-700/20 transition hover:bg-emerald-800 active:scale-95 cursor-pointer"
+                  onClick={() => triggerHaptic("heavy")}
+                  className="flex-1 rounded-full bg-[#16a34a] py-3 text-center text-xs font-black uppercase tracking-wider text-white shadow-md transition hover:bg-[#15803d] active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  Start Coached Protocol
+                  <Phone size={13} />
+                  <span>WhatsApp</span>
+                </a>
+                <a
+                  href={TG_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => triggerHaptic("heavy")}
+                  className="flex-1 rounded-full bg-[#0284c7] py-3 text-center text-xs font-black uppercase tracking-wider text-white shadow-md transition hover:bg-[#0369a1] active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <MessageCircle size={14} />
+                  <span>Telegram</span>
                 </a>
               </div>
             </div>
@@ -505,9 +631,11 @@ export default function AmenWellnessPage() {
               <div>
                 <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">Comprehensive</span>
                 <h3 className="text-xl font-black text-stone-900 mt-1">VIP Full Transformation</h3>
-                <div className="mt-4 flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-stone-900 font-mono">$49</span>
-                  <span className="text-xs font-semibold text-stone-500">/ week</span>
+                <div className="mt-4 flex items-center gap-2">
+                  <span className="rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-black text-emerald-900 uppercase tracking-wider">
+                    VIP Bespoke
+                  </span>
+                  <span className="text-xs font-semibold text-stone-500">All-Inclusive</span>
                 </div>
                 <p className="mt-3 text-xs text-stone-600 leading-relaxed">
                   Complete nutrition, custom workout programming, biometric tracking, and direct voice/call consultations.
@@ -524,23 +652,35 @@ export default function AmenWellnessPage() {
                   </li>
                   <li className="flex items-center gap-2">
                     <Check size={15} className="text-emerald-600 shrink-0" />
-                    <span>Bi-weekly 1-on-1 strategy calls</span>
+                    <span>1-on-1 strategy calls &amp; voice feedback</span>
                   </li>
                   <li className="flex items-center gap-2">
                     <Check size={15} className="text-emerald-600 shrink-0" />
-                    <span>VIP 24/7 direct coach access</span>
+                    <span>VIP priority line direct with Coach Amen</span>
                   </li>
                 </ul>
               </div>
 
-              <div className="mt-8">
+              <div className="mt-8 flex flex-col sm:flex-row gap-2">
                 <a
-                  href="https://t.me"
+                  href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20am%20interested%20in%20the%20VIP%20Full%20Transformation%20program.`}
                   target="_blank"
                   rel="noreferrer"
-                  className="block w-full rounded-full border border-stone-300 bg-white py-3 text-center text-xs font-bold text-stone-800 transition hover:bg-stone-50 active:scale-95 cursor-pointer"
+                  onClick={() => triggerHaptic("medium")}
+                  className="flex-1 rounded-full border border-emerald-600 bg-emerald-50/50 py-2.5 text-center text-xs font-bold text-emerald-900 transition hover:bg-emerald-100 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  Apply for VIP Coaching
+                  <Phone size={12} className="text-emerald-700" />
+                  <span>WhatsApp</span>
+                </a>
+                <a
+                  href={TG_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => triggerHaptic("medium")}
+                  className="flex-1 rounded-full bg-emerald-700 py-2.5 text-center text-xs font-bold text-white transition hover:bg-emerald-800 active:scale-95 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                >
+                  <MessageCircle size={13} />
+                  <span>Telegram</span>
                 </a>
               </div>
             </div>
@@ -558,7 +698,7 @@ export default function AmenWellnessPage() {
               Frequently Asked Questions
             </h2>
             <p className="text-sm text-stone-600">
-              Factual, transparent information about Coach Amen&apos;s nutritional methods and the Telegram platform.
+              Factual information about Coach Amen&apos;s nutritional methods, coaching delivery, and direct contact.
             </p>
           </div>
 
@@ -569,8 +709,8 @@ export default function AmenWellnessPage() {
                 a: "The Amen Protocol begins with a metabolic and lifestyle assessment. Coach Amen designs a 100% bio-individual meal architecture with calibrated proteins, healthy fats, and low-glycemic carbs to accelerate fat oxidation while keeping hunger and cravings under control.",
               },
               {
-                q: "How do I access Coach Amen on Telegram?",
-                a: "You can open our Telegram Mini App in one tap from your phone or desktop. Inside Telegram, you can review your daily meal schedule, log habits, and send photos of your meals directly to Coach Amen for real-time feedback.",
+                q: "How do I reach Coach Amen for coaching?",
+                a: "You can message Coach Amen directly on WhatsApp or Telegram at +251 981 120 503. You will receive an immediate welcome, a lifestyle intake questionnaire, and your personalized macro schedule.",
               },
               {
                 q: "Are the nutrition plans restrictive or based on crash diets?",
@@ -581,8 +721,8 @@ export default function AmenWellnessPage() {
                 a: "Clients on the coached protocol typically lose an average of 0.5kg to 1.0kg of fat per week while maintaining lean muscle and seeing significant improvements in digestive health, daily energy, and blood sugar stability.",
               },
               {
-                q: "Can I join from outside the United States?",
-                a: "Yes! Coach Amen works with clients worldwide through our Telegram Mini App, providing localized grocery shopping lists and international consultation scheduling.",
+                q: "Can I join from outside Ethiopia or worldwide?",
+                a: "Yes! Coach Amen works with clients worldwide through WhatsApp and our Telegram Mini App, providing localized grocery shopping lists and international consultation scheduling.",
               },
             ].map((faq, idx) => (
               <div
@@ -611,7 +751,7 @@ export default function AmenWellnessPage() {
           </div>
         </section>
 
-        {/* ======================= DIRECT TELEGRAM CTA BANNER ======================= */}
+        {/* ======================= DIRECT CTA BANNER ======================= */}
         <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
           <div className="wellbites-hero-card rounded-[2.5rem] p-8 sm:p-12 text-center text-white relative overflow-hidden">
             <span className="text-xs font-black uppercase tracking-widest text-emerald-300">
@@ -621,17 +761,28 @@ export default function AmenWellnessPage() {
               Start Your Journey with Coach Amen Today.
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm text-emerald-50 leading-relaxed opacity-90">
-              Your personalized meal architecture, daily accountability, and metabolic reset are ready in one tap inside Telegram.
+              Your personalized meal architecture, daily accountability, and metabolic reset are ready. Contact Coach Amen on WhatsApp or Telegram at <span className="font-bold underline text-white">{DISPLAY_PHONE}</span>.
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a
-                href="https://t.me"
+                href={`${WA_LINK}?text=Hi%20Coach%20Amen%2C%20I%20am%20ready%20to%20start%20my%20wellness%20transformation.`}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-xs font-black uppercase tracking-wider text-emerald-950 shadow-xl transition hover:bg-emerald-50 active:scale-95 cursor-pointer"
+                onClick={() => triggerHaptic("medium")}
+                className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-xs font-black uppercase tracking-wider text-emerald-950 shadow-xl transition hover:bg-emerald-50 active:scale-95 cursor-pointer"
               >
-                <span>Open Amen Wellness in Telegram</span>
-                <ArrowRight size={16} />
+                <Phone size={15} className="text-emerald-700" />
+                <span>WhatsApp: {DISPLAY_PHONE}</span>
+              </a>
+              <a
+                href={TG_LINK}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => triggerHaptic("medium")}
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-7 py-3.5 text-xs font-black uppercase tracking-wider text-white backdrop-blur-md transition hover:bg-white/20 active:scale-95 cursor-pointer"
+              >
+                <MessageCircle size={15} />
+                <span>Telegram Chat</span>
               </a>
             </div>
           </div>
@@ -670,39 +821,77 @@ export default function AmenWellnessPage() {
 
             <div>
               <span className="font-extrabold text-stone-900 uppercase tracking-wider block mb-3 text-[11px]">
-                Geographic Coverage (GEO)
+                Direct Contact
               </span>
-              <ul className="space-y-1.5 text-stone-500">
-                <li className="flex items-center gap-1.5"><Globe2 size={13} className="text-emerald-600" /> Worldwide Online Coaching</li>
-                <li>🇺🇸 United States &amp; Canada</li>
-                <li>🇬🇧 United Kingdom &amp; Europe</li>
-                <li>🇦🇪 UAE &amp; Middle East</li>
+              <ul className="space-y-2">
+                <li>
+                  <a
+                    href={WA_LINK}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 text-stone-700 hover:text-emerald-700 font-semibold"
+                  >
+                    <Phone size={13} className="text-emerald-600" />
+                    <span>WhatsApp: {DISPLAY_PHONE}</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={TG_LINK}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex items-center gap-2 text-stone-700 hover:text-emerald-700 font-semibold"
+                  >
+                    <MessageCircle size={13} className="text-emerald-600" />
+                    <span>Telegram: {DISPLAY_PHONE}</span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href={`tel:${WHATSAPP_NUMBER}`}
+                    className="flex items-center gap-2 text-stone-500 hover:text-emerald-700"
+                  >
+                    <span>Direct Call: {DISPLAY_PHONE}</span>
+                  </a>
+                </li>
               </ul>
             </div>
 
             <div>
               <span className="font-extrabold text-stone-900 uppercase tracking-wider block mb-3 text-[11px]">
-                Telegram Mini App
+                Client Platform
               </span>
               <p className="text-stone-500 mb-3 leading-relaxed">
-                Seamlessly integrated with Telegram WebApp SDK and HMAC cryptographic verification.
+                Coaching delivered seamlessly via Telegram Mini App and direct WhatsApp consultation.
               </p>
-              <a
-                href="https://t.me"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800"
-              >
-                <span>Launch Bot on Telegram</span>
-                <ArrowUpRight size={14} />
-              </a>
+              <div className="flex items-center gap-2">
+                <a
+                  href={TG_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800"
+                >
+                  <span>Launch Telegram</span>
+                  <ArrowUpRight size={14} />
+                </a>
+                <span>•</span>
+                <a
+                  href={WA_LINK}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800"
+                >
+                  <span>WhatsApp</span>
+                  <ArrowUpRight size={14} />
+                </a>
+              </div>
             </div>
 
           </div>
 
           <div className="mt-12 border-t border-stone-100 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-stone-400">
             <div>© 2026 Amen Weight &amp; Wellness. All rights reserved. Directed by Coach Amen.</div>
-            <div>Designed for simplicity, speed, and real health transformation.</div>
+            <div>Direct Line: {DISPLAY_PHONE} (WhatsApp &amp; Telegram)</div>
           </div>
         </div>
       </footer>
