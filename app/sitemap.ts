@@ -1,45 +1,14 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://amenwellness.com";
-  const currentDate = new Date();
-
+  const lastModified = new Date();
   return [
-    {
-      url: baseUrl,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/#protocol`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/#meals`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/#coach`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.85,
-    },
-    {
-      url: `${baseUrl}/#plans`,
-      lastModified: currentDate,
-      changeFrequency: "weekly",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/#faq`,
-      lastModified: currentDate,
-      changeFrequency: "monthly",
-      priority: 0.75,
-    },
+    { url: SITE_URL, lastModified, changeFrequency: "weekly", priority: 1.0 },
+    { url: `${SITE_URL}/#protocol`, lastModified, changeFrequency: "weekly", priority: 0.9 },
+    { url: `${SITE_URL}/#meals`, lastModified, changeFrequency: "weekly", priority: 0.85 },
+    { url: `${SITE_URL}/#coach`, lastModified, changeFrequency: "monthly", priority: 0.85 },
+    { url: `${SITE_URL}/#plans`, lastModified, changeFrequency: "weekly", priority: 0.8 },
+    { url: `${SITE_URL}/#faq`, lastModified, changeFrequency: "monthly", priority: 0.75 },
   ];
 }
